@@ -42,20 +42,44 @@ namespace LogViewer
             try
             {
                 UpdateStatus($"Дешифровка файла...");
-
-                string decryptedContent = LogDecryptor.DecryptLogFile(filePath);
-                _allEntries = LogDecryptor.ParseLogContent(decryptedContent);
+                
+                string decryptedContent;
+                
+                // Определяем тип файла
+                if (LogDecryptor.IsEncryptedReportFile(filePath))
+                {
+                    // Это отчет
+                    decryptedContent = LogDecryptor.DecryptReportFile(filePath);
+                    TxtFileInfo.Text = $"Отчет: {Path.GetFileName(filePath)} (дешифрован)";
+                }
+                else
+                {
+                    // Это обычные логи
+                    decryptedContent = LogDecryptor.DecryptLogFile(filePath);
+                    _allEntries = LogDecryptor.ParseLogContent(decryptedContent);
+                    TxtFileInfo.Text = $"Файл: {Path.GetFileName(filePath)} ({new FileInfo(filePath).Length} байт)";
+                }
+                
                 _currentFilePath = filePath;
-
-                ApplyFilters();
-
-                var fileInfo = new FileInfo(filePath);
-                TxtFileInfo.Text = $"Файл: {fileInfo.Name} ({fileInfo.Length} байт)";
+                
+                // Для отчетов показываем содержимое напрямую
+                if (LogDecryptor.IsEncryptedReportFile(filePath))
+                {
+                    TxtDetailHeader.Text = $"Отчет: {Path.GetFileName(filePath)}";
+                    TxtDetailContent.Text = decryptedContent;
+                    LvLogEntries.ItemsSource = new List<LogEntry>(); // Очищаем список
+                    TxtEntryCount.Text = "Отчет (дешифрован)";
+                }
+                else
+                {
+                    ApplyFilters();
+                }
+                
                 UpdateStatus($"Файл загружен: {_allEntries.Count} записей");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки файла:\n{ex.Message}",
+                MessageBox.Show($"Ошибка загрузки файла:\n{ex.Message}", 
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateStatus($"Ошибка: {ex.Message}");
             }

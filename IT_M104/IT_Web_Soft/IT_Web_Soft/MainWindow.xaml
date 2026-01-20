@@ -139,6 +139,10 @@
             </StatusBarItem>
             <Separator/>
             <StatusBarItem>
+                <TextBlock x:Name="TxtFileType" Text="Тип: неизвестно"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
                 <TextBlock x:Name="TxtEntryCount" Text="Записей: 0"/>
             </StatusBarItem>
         </StatusBar>

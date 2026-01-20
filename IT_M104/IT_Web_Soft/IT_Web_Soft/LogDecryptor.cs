@@ -54,6 +54,77 @@ namespace LogViewer.Services
             }
         }
 
+        public static string DecryptReportFile(string filePath)
+        {
+            try
+            {
+                // Дешифруем файл (аналогично обычным логам)
+                string decryptedContent = DecryptLogFile(filePath);
+                
+                // Проверяем, является ли это отчетом
+                if (decryptedContent.Contains("=== ОТЧЕТ ОБ ОШИБКАХ"))
+                {
+                    return decryptedContent;
+                }
+                
+                // Если это обычные логи, преобразуем их в формат отчета
+                var entries = ParseLogContent(decryptedContent);
+                
+                var report = new StringBuilder();
+                report.AppendLine("=== АВТОМАТИЧЕСКИ СГЕНЕРИРОВАННЫЙ ОТЧЕТ ===");
+                report.AppendLine($"Сгенерировано: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                report.AppendLine($"Файл: {Path.GetFileName(filePath)}");
+                report.AppendLine($"Всего записей: {entries.Count}");
+                report.AppendLine();
+                
+                report.AppendLine("=== ПОСЛЕДНИЕ 100 ЗАПИСЕЙ ===");
+                foreach (var entry in entries.OrderByDescending(e => e.Timestamp).Take(100))
+                {
+                    report.AppendLine(entry.RawEntry);
+                }
+                
+                report.AppendLine();
+                report.AppendLine("=== ИНФОРМАЦИЯ ДЛЯ РАЗРАБОТЧИКА ===");
+                report.AppendLine("Файл зашифрован: AES-256-CBC");
+                report.AppendLine($"Ключ: {EncryptionKey}");
+                report.AppendLine($"Размер файла: {new FileInfo(filePath).Length} байт");
+                
+                return report.ToString();
+            }
+            catch (Exception ex)
+            {
+                return $"Ошибка дешифровки отчета: {ex.Message}\n\n" +
+                    $"Исходные данные (hex): {BitConverter.ToString(File.ReadAllBytes(filePath)).Replace("-", " ")}";
+            }
+        }
+
+        public static bool IsEncryptedReportFile(string filePath)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                    return false;
+                    
+                byte[] data = File.ReadAllBytes(filePath);
+                
+                // Минимальный размер для зашифрованного файла (IV + хотя бы 1 байт данных)
+                if (data.Length < 17)
+                    return false;
+                    
+                // Пытаемся дешифровать
+                string decrypted = DecryptLogFile(filePath);
+                
+                // Проверяем наличие маркеров отчета
+                return decrypted.Contains("=== ОТЧЕТ ОБ ОШИБКАХ") || 
+                    decrypted.Contains("Сгенерировано:") ||
+                    decrypted.Contains("Приложение:");
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static List<LogEntry> ParseLogContent(string decryptedContent)
         {
             var entries = new List<LogEntry>();
