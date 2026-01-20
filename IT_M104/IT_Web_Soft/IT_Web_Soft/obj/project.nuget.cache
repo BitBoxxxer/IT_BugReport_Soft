@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Kg588xPTIlQ=",
+  "dgSpecHash": "dKAgaKOHf00=",
   "success": true,
   "projectFilePath": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
   "expectedPackageFiles": [
@@ -14,7 +14,7 @@
     {
       "code": "NU1510",
       "level": "Warning",
-      "message": "PackageReference System.Security.Cryptography.Algorithms не будет урезано. Рассмотрите возможность удаления этого пакета из зависимостей, так как он, вероятно, не требуется.",
+      "message": "PackageReference System.Security.Cryptography.Algorithms will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
       "projectPath": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
       "warningLevel": 1,
       "filePath": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",

@@ -42,15 +42,19 @@ namespace LogViewer
             try
             {
                 UpdateStatus($"Дешифровка файла...");
-                
+
                 string decryptedContent;
-                
+
                 // Определяем тип файла
                 if (LogDecryptor.IsEncryptedReportFile(filePath))
                 {
                     // Это отчет
                     decryptedContent = LogDecryptor.DecryptReportFile(filePath);
                     TxtFileInfo.Text = $"Отчет: {Path.GetFileName(filePath)} (дешифрован)";
+
+                    // Извлекаем записи из отчета
+                    _allEntries = ExtractEntriesFromReport(decryptedContent);
+                    TxtFileType.Text = "Тип: Отчет";
                 }
                 else
                 {
@@ -58,31 +62,72 @@ namespace LogViewer
                     decryptedContent = LogDecryptor.DecryptLogFile(filePath);
                     _allEntries = LogDecryptor.ParseLogContent(decryptedContent);
                     TxtFileInfo.Text = $"Файл: {Path.GetFileName(filePath)} ({new FileInfo(filePath).Length} байт)";
+                    TxtFileType.Text = "Тип: Логи";
                 }
-                
+
                 _currentFilePath = filePath;
-                
+
                 // Для отчетов показываем содержимое напрямую
-                if (LogDecryptor.IsEncryptedReportFile(filePath))
+                if (_allEntries.Count == 0 && decryptedContent.Contains("=== ОТЧЕТ ОБ ОШИБКАХ"))
                 {
                     TxtDetailHeader.Text = $"Отчет: {Path.GetFileName(filePath)}";
                     TxtDetailContent.Text = decryptedContent;
-                    LvLogEntries.ItemsSource = new List<LogEntry>(); // Очищаем список
-                    TxtEntryCount.Text = "Отчет (дешифрован)";
+                    TxtEntryCount.Text = $"Отчет ({new FileInfo(filePath).Length} байт)";
                 }
                 else
                 {
                     ApplyFilters();
                 }
-                
+
                 UpdateStatus($"Файл загружен: {_allEntries.Count} записей");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки файла:\n{ex.Message}", 
+                MessageBox.Show($"Ошибка загрузки файла:\n{ex.Message}",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateStatus($"Ошибка: {ex.Message}");
             }
+        }
+
+        // Новый метод для извлечения записей из отчета
+        private List<LogEntry> ExtractEntriesFromReport(string reportContent)
+        {
+            var entries = new List<LogEntry>();
+
+            if (string.IsNullOrEmpty(reportContent))
+                return entries;
+
+            var lines = reportContent.Split('\n');
+            bool inEntriesSection = false;
+
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+
+                // Начинаем сбор записей после заголовка
+                if (trimmedLine.StartsWith("=== ПОСЛЕДНИЕ"))
+                {
+                    inEntriesSection = true;
+                    continue;
+                }
+
+                // Заканчиваем сбор записей при следующем заголовке
+                if (inEntriesSection && trimmedLine.StartsWith("==="))
+                {
+                    inEntriesSection = false;
+                    continue;
+                }
+
+                // Парсим записи в формате логов
+                if (inEntriesSection && !string.IsNullOrEmpty(trimmedLine))
+                {
+                    var entry = LogDecryptor.ParseLogLine(trimmedLine);
+                    if (entry != null)
+                        entries.Add(entry);
+                }
+            }
+
+            return entries;
         }
 
         private void ApplyFilters()

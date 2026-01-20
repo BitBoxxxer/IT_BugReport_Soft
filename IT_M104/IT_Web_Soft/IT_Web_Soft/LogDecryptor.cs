@@ -150,9 +150,15 @@ namespace LogViewer.Services
             return entries;
         }
 
-        private static LogEntry? ParseLogLine(string line)
+        public static LogEntry? ParseLogLine(string line)
         {
             if (string.IsNullOrWhiteSpace(line))
+                return null;
+
+            // Пропускаем пустые строки и заголовки
+            if (line.StartsWith("===") || line.StartsWith("Сгенерировано:") ||
+                line.StartsWith("Приложение:") || line.StartsWith("Версия:") ||
+                line.StartsWith("Устройство:") || line.StartsWith("Email:"))
                 return null;
 
             // Формат: (Время)_(Тип_Действия)_(Описание || JSON)
@@ -170,6 +176,8 @@ namespace LogViewer.Services
             var actionType = remaining.Substring(0, actionEnd);
 
             var descriptionPart = remaining.Substring(actionEnd + 2); // Пропускаем ")_"
+
+            // Убираем закрывающую скобку если есть
             if (descriptionPart.EndsWith(')'))
                 descriptionPart = descriptionPart.Substring(0, descriptionPart.Length - 1);
 
@@ -182,6 +190,11 @@ namespace LogViewer.Services
             {
                 description = descriptionPart.Substring(0, jsonSeparator);
                 var jsonPart = descriptionPart.Substring(jsonSeparator + 4);
+
+                // Убираем возможные пробелы и лишние символы
+                jsonPart = jsonPart.Trim();
+                if (jsonPart.EndsWith(')'))
+                    jsonPart = jsonPart.Substring(0, jsonPart.Length - 1);
 
                 try
                 {
