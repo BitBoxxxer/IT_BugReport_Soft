@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj": {}
+    "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj": {}
   },
   "projects": {
-    "d:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj": {
+    "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
+        "projectUniqueName": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
         "projectName": "IT_Web_Soft",
-        "projectPath": "d:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
+        "projectPath": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
         "packagesPath": "C:\\Users\\Super Director\\.nuget\\packages\\",
-        "outputPath": "d:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\obj\\",
+        "outputPath": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Super Director\\AppData\\Roaming\\NuGet\\NuGet.Config",

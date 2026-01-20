@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|solutionrelative:it_web_soft\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|d:\\git_hub\\it_bugreport_soft\\it_m104\\it_web_soft\\it_web_soft\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|solutionrelative:it_web_soft\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|d:\\git_hub\\it_bugreport_soft\\it_m104\\it_web_soft\\it_web_soft\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|solutionrelative:it_web_soft\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
@@ -21,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|d:\\git_hub\\it_bugreport_soft\\it_m104\\it_web_soft\\it_web_soft\\it_web_soft.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|solutionrelative:it_web_soft\\it_web_soft.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|d:\\git_hub\\it_bugreport_soft\\it_m104\\it_web_soft\\it_web_soft\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E7918456-4510-8253-DC9F-72F23DEE6CD0}|IT_Web_Soft\\IT_Web_Soft.csproj|solutionrelative:it_web_soft\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,7 +38,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "App.xaml",
               "DocumentMoniker": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\App.xaml",
               "RelativeDocumentMoniker": "IT_Web_Soft\\App.xaml",
@@ -50,7 +50,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "LogDecryptor.cs",
               "DocumentMoniker": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\LogDecryptor.cs",
               "RelativeDocumentMoniker": "IT_Web_Soft\\LogDecryptor.cs",
@@ -62,7 +62,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "LogEntry.cs",
               "DocumentMoniker": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\LogEntry.cs",
               "RelativeDocumentMoniker": "IT_Web_Soft\\LogEntry.cs",
@@ -74,7 +74,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "IT_Web_Soft.csproj",
               "DocumentMoniker": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\IT_Web_Soft.csproj",
               "RelativeDocumentMoniker": "IT_Web_Soft\\IT_Web_Soft.csproj",
@@ -98,15 +98,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "IT_Web_Soft\\MainWindow.xaml.cs",
               "ToolTip": "D:\\GIT_HUB\\IT_BugReport_Soft\\IT_M104\\IT_Web_Soft\\IT_Web_Soft\\MainWindow.xaml.cs",
               "RelativeToolTip": "IT_Web_Soft\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAKYAAAAAAAAAAAAiwM0AAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAqwHQAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-20T19:06:33.517Z"
+              "WhenOpened": "2026-01-20T19:06:33.517Z",
+              "EditorCaption": ""
             }
           ]
         }
