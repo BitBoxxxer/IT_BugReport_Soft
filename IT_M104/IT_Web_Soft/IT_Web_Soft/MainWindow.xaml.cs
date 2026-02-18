@@ -77,7 +77,12 @@ namespace LogViewer
 
             if (openFileDialog.ShowDialog() == true)
             {
+                System.Diagnostics.Debug.WriteLine($"File selected: {openFileDialog.FileName}");
                 LoadLogFile(openFileDialog.FileName);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("File dialog cancelled");
             }
         }
 
@@ -86,25 +91,44 @@ namespace LogViewer
             try
             {
                 UpdateStatus("Decrypting file...");
+                System.Diagnostics.Debug.WriteLine($"Loading file: {filePath}");
 
                 string decryptedContent;
 
+                // First try to decrypt directly
+                try
+                {
+                    decryptedContent = LogDecryptor.DecryptLogFile(filePath);
+                    System.Diagnostics.Debug.WriteLine($"Decrypted content length: {decryptedContent.Length}");
+                }
+                catch (Exception decryptEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Decryption error: {decryptEx.Message}");
+                    MessageBox.Show($"Decryption error:\n{decryptEx.Message}\n\nFile: {filePath}\nSize: {new FileInfo(filePath).Length} bytes",
+                        "Decryption Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    UpdateStatus($"Decryption error: {decryptEx.Message}");
+                    return;
+                }
+
                 // Determine file type
-                if (LogDecryptor.IsEncryptedReportFile(filePath))
+                bool isReport = LogDecryptor.IsEncryptedReportFile(filePath);
+                System.Diagnostics.Debug.WriteLine($"IsReport: {isReport}");
+                System.Diagnostics.Debug.WriteLine($"Decrypted content preview: {decryptedContent.Substring(0, Math.Min(200, decryptedContent.Length))}");
+                
+                if (isReport)
                 {
                     // This is a report
-                    decryptedContent = LogDecryptor.DecryptReportFile(filePath);
                     TxtFileInfo.Text = $"Report: {Path.GetFileName(filePath)} (decrypted)";
 
                     // Extract entries from report
                     var reportEntries = ExtractEntriesFromReport(decryptedContent);
+                    System.Diagnostics.Debug.WriteLine($"Report entries extracted: {reportEntries.Count}");
                     _allEntries.AddRange(reportEntries);
                     TxtFileType.Text = "Type: Report";
                 }
                 else
                 {
                     // Regular logs
-                    decryptedContent = LogDecryptor.DecryptLogFile(filePath);
                     var newEntries = LogDecryptor.ParseLogContent(decryptedContent);
                     
                     // Import to storage
@@ -123,15 +147,33 @@ namespace LogViewer
                 _dataService.SaveSettings(settings);
 
                 // For reports show content directly
-                if (_allEntries.Count == 0 && decryptedContent.Contains("=== ERROR REPORT"))
+                System.Diagnostics.Debug.WriteLine($"All entries count: {_allEntries.Count}");
+                bool isReportContent = decryptedContent.Contains("=== ERROR REPORT") || 
+                                       decryptedContent.Contains("=== ОТЧЕТ ОБ ОШИБКАХ") ||
+                                       decryptedContent.Contains("=== ОШИБКА СОЗДАНИЯ ОТЧЕТА");
+                System.Diagnostics.Debug.WriteLine($"Is report content: {isReportContent}");
+                
+                // Show raw content for reports (even if no entries extracted)
+                if (isReportContent)
                 {
+                    System.Diagnostics.Debug.WriteLine("Showing raw report content in detail panel");
                     TxtDetailHeader.Text = $"Report: {Path.GetFileName(filePath)}";
                     TxtDetailContent.Text = decryptedContent;
-                    TxtEntryCount.Text = $"Report ({new FileInfo(filePath).Length} bytes)";
+                    TxtEntryCount.Text = $"Report ({decryptedContent.Length} chars)";
+                    TxtFileInfo.Text = $"Report: {Path.GetFileName(filePath)} (decrypted)";
+                }
+                else if (_allEntries.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Calling ApplyFilters()");
+                    ApplyFilters();
                 }
                 else
                 {
-                    ApplyFilters();
+                    // No entries and not a report - show raw content anyway
+                    System.Diagnostics.Debug.WriteLine("No entries, showing raw content");
+                    TxtDetailHeader.Text = $"File: {Path.GetFileName(filePath)}";
+                    TxtDetailContent.Text = decryptedContent;
+                    TxtEntryCount.Text = $"Content ({decryptedContent.Length} chars)";
                 }
 
                 UpdateStatus($"File loaded: {_allEntries.Count} entries");
@@ -158,8 +200,8 @@ namespace LogViewer
             {
                 var trimmedLine = line.Trim();
 
-                // Start collecting entries after header
-                if (trimmedLine.StartsWith("=== LAST"))
+                // Start collecting entries after header (both English and Russian)
+                if (trimmedLine.StartsWith("=== LAST") || trimmedLine.StartsWith("=== ПОСЛЕДНИЕ"))
                 {
                     inEntriesSection = true;
                     continue;
@@ -181,6 +223,7 @@ namespace LogViewer
                 }
             }
 
+            System.Diagnostics.Debug.WriteLine($"ExtractEntriesFromReport: extracted {entries.Count} entries");
             return entries;
         }
 
@@ -190,8 +233,14 @@ namespace LogViewer
 
         private void ApplyFilters()
         {
+            System.Diagnostics.Debug.WriteLine($"ApplyFilters called, _isInitialized={_isInitialized}, _allEntries.Count={_allEntries.Count}");
+            
             // Skip if controls are not initialized yet
-            if (!_isInitialized) return;
+            if (!_isInitialized)
+            {
+                System.Diagnostics.Debug.WriteLine("ApplyFilters: NOT INITIALIZED, returning early");
+                return;
+            }
             
             var filtered = _allEntries.AsEnumerable();
 
@@ -225,6 +274,9 @@ namespace LogViewer
 
             _filteredEntries = filtered.ToList();
             LvLogEntries.ItemsSource = _filteredEntries;
+            
+            System.Diagnostics.Debug.WriteLine($"ApplyFilters: Filtered entries count = {_filteredEntries.Count}");
+            System.Diagnostics.Debug.WriteLine($"ApplyFilters: LvLogEntries.ItemsSource set");
 
             // Update counts
             TxtEntryCount.Text = $"Entries: {_filteredEntries.Count} of {_allEntries.Count}";

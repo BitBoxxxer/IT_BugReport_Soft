@@ -24,14 +24,17 @@ namespace LogViewer.Services
             {
                 byte[] encryptedData = File.ReadAllBytes(filePath);
 
-                if (encryptedData.Length <= 16)
-                    throw new ArgumentException("Файл слишком мал для дешифровки");
+                if (encryptedData.Length == 0)
+                    throw new ArgumentException("File is empty");
 
-                // Извлекаем IV (первые 16 байт)
+                if (encryptedData.Length <= 16)
+                    throw new ArgumentException($"File too small for decryption ({encryptedData.Length} bytes, minimum 17 required)");
+
+                // Extract IV (first 16 bytes)
                 byte[] iv = new byte[16];
                 Array.Copy(encryptedData, 0, iv, 0, 16);
 
-                // Извлекаем зашифрованные данные
+                // Extract encrypted data
                 byte[] cipherText = new byte[encryptedData.Length - 16];
                 Array.Copy(encryptedData, 16, cipherText, 0, cipherText.Length);
 
@@ -48,9 +51,13 @@ namespace LogViewer.Services
 
                 return sr.ReadToEnd();
             }
+            catch (CryptographicException ex)
+            {
+                throw new Exception($"Decryption error (invalid key or corrupted data): {ex.Message}");
+            }
             catch (Exception ex)
             {
-                throw new Exception($"Ошибка дешифровки: {ex.Message}", ex);
+                throw new Exception($"Error decrypting file: {ex.Message}", ex);
             }
         }
 
@@ -58,43 +65,67 @@ namespace LogViewer.Services
         {
             try
             {
-                // Дешифруем файл (аналогично обычным логам)
+                // Decrypt file (same as regular logs)
                 string decryptedContent = DecryptLogFile(filePath);
                 
-                // Проверяем, является ли это отчетом
-                if (decryptedContent.Contains("=== ОТЧЕТ ОБ ОШИБКАХ"))
+                // Check if it's a report
+                if (decryptedContent.Contains("=== ОТЧЕТ ОБ ОШИБКАХ") || 
+                    decryptedContent.Contains("=== ERROR REPORT") ||
+                    decryptedContent.Contains("=== ОШИБКА СОЗДАНИЯ ОТЧЕТА"))
                 {
                     return decryptedContent;
                 }
                 
-                // Если это обычные логи, преобразуем их в формат отчета
+                // If regular logs, convert to report format
                 var entries = ParseLogContent(decryptedContent);
                 
                 var report = new StringBuilder();
-                report.AppendLine("=== АВТОМАТИЧЕСКИ СГЕНЕРИРОВАННЫЙ ОТЧЕТ ===");
-                report.AppendLine($"Сгенерировано: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                report.AppendLine($"Файл: {Path.GetFileName(filePath)}");
-                report.AppendLine($"Всего записей: {entries.Count}");
+                report.AppendLine("=== AUTO-GENERATED REPORT ===");
+                report.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                report.AppendLine($"File: {Path.GetFileName(filePath)}");
+                report.AppendLine($"Total entries: {entries.Count}");
                 report.AppendLine();
                 
-                report.AppendLine("=== ПОСЛЕДНИЕ 100 ЗАПИСЕЙ ===");
+                report.AppendLine("=== LAST 100 ENTRIES ===");
                 foreach (var entry in entries.OrderByDescending(e => e.Timestamp).Take(100))
                 {
                     report.AppendLine(entry.RawEntry);
                 }
                 
                 report.AppendLine();
-                report.AppendLine("=== ИНФОРМАЦИЯ ДЛЯ РАЗРАБОТЧИКА ===");
-                report.AppendLine("Файл зашифрован: AES-256-CBC");
-                report.AppendLine($"Ключ: {EncryptionKey}");
-                report.AppendLine($"Размер файла: {new FileInfo(filePath).Length} байт");
+                report.AppendLine("=== DEVELOPER INFO ===");
+                report.AppendLine("Encryption: AES-256-CBC");
+                report.AppendLine($"Key: {EncryptionKey}");
+                report.AppendLine($"File size: {new FileInfo(filePath).Length} bytes");
                 
                 return report.ToString();
             }
             catch (Exception ex)
             {
-                return $"Ошибка дешифровки отчета: {ex.Message}\n\n" +
-                    $"Исходные данные (hex): {BitConverter.ToString(File.ReadAllBytes(filePath)).Replace("-", " ")}";
+                // Return detailed error info for debugging
+                var errorInfo = new StringBuilder();
+                errorInfo.AppendLine($"Decryption error: {ex.Message}");
+                errorInfo.AppendLine();
+                errorInfo.AppendLine("=== FILE INFO ===");
+                try
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    errorInfo.AppendLine($"File exists: {fileInfo.Exists}");
+                    errorInfo.AppendLine($"File size: {fileInfo.Length} bytes");
+                    
+                    if (fileInfo.Exists && fileInfo.Length > 0)
+                    {
+                        var bytes = File.ReadAllBytes(filePath);
+                        errorInfo.AppendLine($"First 32 bytes (hex): {BitConverter.ToString(bytes, 0, Math.Min(32, bytes.Length)).Replace("-", " ")}");
+                        errorInfo.AppendLine($"Key hash (hex): {BitConverter.ToString(KeyHash).Replace("-", " ")}");
+                    }
+                }
+                catch (Exception innerEx)
+                {
+                    errorInfo.AppendLine($"Error reading file info: {innerEx.Message}");
+                }
+                
+                return errorInfo.ToString();
             }
         }
 
@@ -107,15 +138,17 @@ namespace LogViewer.Services
                     
                 byte[] data = File.ReadAllBytes(filePath);
                 
-                // Минимальный размер для зашифрованного файла (IV + хотя бы 1 байт данных)
+                // Minimum size for encrypted file (IV + at least 1 byte of data)
                 if (data.Length < 17)
                     return false;
                     
-                // Пытаемся дешифровать
+                // Try to decrypt
                 string decrypted = DecryptLogFile(filePath);
                 
-                // Проверяем наличие маркеров отчета
+                // Check for report markers
                 return decrypted.Contains("=== ОТЧЕТ ОБ ОШИБКАХ") || 
+                    decrypted.Contains("=== ERROR REPORT") ||
+                    decrypted.Contains("Generated:") ||
                     decrypted.Contains("Сгенерировано:") ||
                     decrypted.Contains("Приложение:");
             }
@@ -128,6 +161,9 @@ namespace LogViewer.Services
         public static List<LogEntry> ParseLogContent(string decryptedContent)
         {
             var entries = new List<LogEntry>();
+
+            if (string.IsNullOrWhiteSpace(decryptedContent))
+                return entries;
 
             var lines = decryptedContent.Split('\n')
                 .Where(line => !string.IsNullOrWhiteSpace(line))
@@ -143,7 +179,7 @@ namespace LogViewer.Services
                 }
                 catch
                 {
-                    // Пропускаем некорректные строки
+                    // Skip invalid lines
                 }
             }
 
@@ -155,13 +191,19 @@ namespace LogViewer.Services
             if (string.IsNullOrWhiteSpace(line))
                 return null;
 
-            // Пропускаем пустые строки и заголовки
-            if (line.StartsWith("===") || line.StartsWith("Сгенерировано:") ||
-                line.StartsWith("Приложение:") || line.StartsWith("Версия:") ||
-                line.StartsWith("Устройство:") || line.StartsWith("Email:"))
+            // Skip empty lines and headers
+            if (line.StartsWith("===") || line.StartsWith("Generated:") || 
+                line.StartsWith("Сгенерировано:") || line.StartsWith("Приложение:") || 
+                line.StartsWith("Application:") || line.StartsWith("Версия:") ||
+                line.StartsWith("Version:") || line.StartsWith("Устройство:") ||
+                line.StartsWith("Device:") || line.StartsWith("Email:") ||
+                line.StartsWith("=== AUTO-GENERATED") || line.StartsWith("=== LAST") ||
+                line.StartsWith("=== DEVELOPER") || line.StartsWith("=== КОНЕЦ"))
                 return null;
 
-            // Формат: (Время)_(Тип_Действия)_(Описание || JSON)
+            // Format: (Time)_(ActionType)_(Description || JSON)
+            // Example: (2024-01-15 10:30:45.123)_(APP_START)_(Application started || {"version": "1.0.0"})
+            
             var timeEnd = line.IndexOf(')');
             if (timeEnd == -1) return null;
 
@@ -169,29 +211,52 @@ namespace LogViewer.Services
             if (!DateTime.TryParse(timestampStr, out var timestamp))
                 return null;
 
-            var remaining = line.Substring(timeEnd + 2); // Пропускаем ")_"
+            // Check for ")_(" pattern
+            if (timeEnd + 2 >= line.Length || line[timeEnd + 1] != '_')
+                return null;
+
+            var remaining = line.Substring(timeEnd + 2); // After ")_"
+            
+            // Action type is enclosed in parentheses: _(ACTION)_(
+            // Find the opening parenthesis for action type
+            if (remaining.Length == 0 || remaining[0] != '(')
+                return null;
+                
             var actionEnd = remaining.IndexOf(')');
             if (actionEnd == -1) return null;
 
-            var actionType = remaining.Substring(0, actionEnd);
+            var actionType = remaining.Substring(1, actionEnd - 1); // Skip the opening '('
 
-            var descriptionPart = remaining.Substring(actionEnd + 2); // Пропускаем ")_"
+            // Check for ")_(" pattern after action type
+            string descriptionPart;
+            if (actionEnd + 2 <= remaining.Length && remaining[actionEnd + 1] == '_')
+            {
+                descriptionPart = remaining.Substring(actionEnd + 2);
+            }
+            else
+            {
+                descriptionPart = remaining.Substring(actionEnd + 1);
+            }
 
-            // Убираем закрывающую скобку если есть
+            // Remove opening parenthesis if present
+            if (descriptionPart.StartsWith('('))
+                descriptionPart = descriptionPart.Substring(1);
+                
+            // Remove closing bracket if present
             if (descriptionPart.EndsWith(')'))
                 descriptionPart = descriptionPart.Substring(0, descriptionPart.Length - 1);
 
             string description = descriptionPart;
             JObject? extraInfo = null;
 
-            // Пытаемся извлечь JSON
+            // Try to extract JSON
             var jsonSeparator = descriptionPart.IndexOf(" || ");
             if (jsonSeparator != -1)
             {
                 description = descriptionPart.Substring(0, jsonSeparator);
                 var jsonPart = descriptionPart.Substring(jsonSeparator + 4);
 
-                // Убираем возможные пробелы и лишние символы
+                // Remove possible spaces and extra characters
                 jsonPart = jsonPart.Trim();
                 if (jsonPart.EndsWith(')'))
                     jsonPart = jsonPart.Substring(0, jsonPart.Length - 1);
@@ -202,7 +267,7 @@ namespace LogViewer.Services
                 }
                 catch
                 {
-                    // Если JSON некорректен, оставляем как есть
+                    // If JSON is invalid, leave as is
                 }
             }
 
