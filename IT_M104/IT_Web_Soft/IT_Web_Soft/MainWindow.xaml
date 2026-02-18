@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogViewer"
+        xmlns:models="clr-namespace:LogViewer.Models"
         mc:Ignorable="d"
-        Title="Log Viewer" 
+        Title="Log Viewer - IT Top College Journal" 
         Height="800" Width="1200"
         WindowStartupLocation="CenterScreen"
         Background="#0F0F0F"
@@ -65,6 +66,15 @@
             <Setter Property="Margin" Value="12,0,0,0"/>
         </Style>
 
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#1A1A1A"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="#E0E0E0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -89,10 +99,34 @@
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
         </Style>
 
         <Style TargetType="ScrollViewer">
             <Setter Property="Background" Value="#0F0F0F"/>
+        </Style>
+
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2A2A2A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -104,10 +138,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
+        <!-- Header -->
         <Border Grid.Row="0" Background="#1A1A1A" Padding="16,12">
             <StackPanel Orientation="Horizontal">
-                <Image Source="Icon.png" Width="24" Height="24" Margin="0,0,12,0"/>
                 <TextBlock Text="Log Viewer" 
                          FontSize="18" FontWeight="Medium" 
                          VerticalAlignment="Center"/>
@@ -119,49 +152,94 @@
             </StackPanel>
         </Border>
 
-        <!-- Панель управления -->
+        <!-- Control Panel -->
         <Border Grid.Row="1" Background="#1A1A1A" Padding="16,12">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="BtnOpenFile" Content="📂 Открыть файл" 
-                        Click="BtnOpenFile_Click" ToolTip="Открыть файл логов"/>
-                <Button x:Name="BtnRefresh" Content="🔄 Обновить" 
-                        Click="BtnRefresh_Click" ToolTip="Обновить список логов"/>
-                <Button x:Name="BtnExport" Content="💾 Экспорт" 
-                        Click="BtnExport_Click" ToolTip="Экспорт в TXT"/>
-                <Button x:Name="BtnClearFilter" Content="❌ Сбросить" 
-                        Click="BtnClearFilter_Click" ToolTip="Сбросить фильтры"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <Separator/>
+                <!-- Left Buttons -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button x:Name="BtnOpenFile" Content="Open File" 
+                            Click="BtnOpenFile_Click" ToolTip="Open encrypted log file"/>
+                    <Button x:Name="BtnRefresh" Content="Refresh" 
+                            Click="BtnRefresh_Click" ToolTip="Refresh log list"/>
+                    <Button x:Name="BtnExport" Content="Export" 
+                            Click="BtnExport_Click" ToolTip="Export to TXT"/>
+                    <Button x:Name="BtnStatistics" Content="Statistics" 
+                            Click="BtnStatistics_Click" ToolTip="View statistics and reports"/>
+                </StackPanel>
 
-                <TextBlock Text="Поиск" Margin="0,0,8,0"/>
-                <TextBox x:Name="TxtSearch" Width="200" 
-                         TextChanged="TxtSearch_TextChanged"
-                         ToolTip="Поиск по логам"/>
+                <!-- Center Filters -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Search" Margin="0,0,8,0"/>
+                    <TextBox x:Name="TxtSearch" Width="200" 
+                             TextChanged="TxtSearch_TextChanged"
+                             ToolTip="Search in logs"/>
+                    
+                    <Separator/>
+                    
+                    <TextBlock Text="Category" Margin="8,0,8,0"/>
+                    <ComboBox x:Name="CbCategoryFilter" Width="120" 
+                             SelectionChanged="CbCategoryFilter_SelectionChanged">
+                        <ComboBoxItem Content="All" IsSelected="True"/>
+                        <ComboBoxItem Content="System"/>
+                        <ComboBoxItem Content="User"/>
+                        <ComboBoxItem Content="Network"/>
+                        <ComboBoxItem Content="Database"/>
+                        <ComboBoxItem Content="Security"/>
+                        <ComboBoxItem Content="Application"/>
+                        <ComboBoxItem Content="Performance"/>
+                        <ComboBoxItem Content="Other"/>
+                    </ComboBox>
+                    
+                    <Separator/>
+                    
+                    <TextBlock Text="Status" Margin="8,0,8,0"/>
+                    <ComboBox x:Name="CbStatusFilter" Width="120" 
+                             SelectionChanged="CbStatusFilter_SelectionChanged">
+                        <ComboBoxItem Content="All" IsSelected="True"/>
+                        <ComboBoxItem Content="New"/>
+                        <ComboBoxItem Content="In Progress"/>
+                        <ComboBoxItem Content="Resolved"/>
+                        <ComboBoxItem Content="Ignored"/>
+                        <ComboBoxItem Content="Critical"/>
+                        <ComboBoxItem Content="Archived"/>
+                    </ComboBox>
+                </StackPanel>
 
-                <Separator/>
-
-                <CheckBox x:Name="ChkErrorsOnly" Content="Только ошибки" 
-                          Checked="ChkErrorsOnly_Checked" 
-                          Unchecked="ChkErrorsOnly_Unchecked"
-                          ToolTip="Показать только ошибки"/>
-            </StackPanel>
+                <!-- Right Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="BtnAddEntry" Content="Add" 
+                            Click="BtnAddEntry_Click" Background="#2196F3" ToolTip="Add new entry"/>
+                    <Button x:Name="BtnEditEntry" Content="Edit" 
+                            Click="BtnEditEntry_Click" ToolTip="Edit selected entry"/>
+                    <Button x:Name="BtnDeleteEntry" Content="Delete" 
+                            Click="BtnDeleteEntry_Click" Background="#C62828" ToolTip="Delete selected entry"/>
+                    <Button x:Name="BtnClearFilter" Content="Clear Filters" 
+                            Click="BtnClearFilter_Click" ToolTip="Clear all filters"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <!-- Список логов -->
+        <!-- Log List -->
         <Grid Grid.Row="2" Margin="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Список записей -->
+            <!-- Entry List -->
             <ListView x:Name="LvLogEntries" Grid.Column="0" 
                       SelectionChanged="LvLogEntries_SelectionChanged"
                       BorderThickness="0,0,1,0" 
                       BorderBrush="#2A2A2A">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Время" Width="90">
+                        <GridViewColumn Header="Time" Width="70">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -172,7 +250,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Тип" Width="80">
+                        <GridViewColumn Header="Type" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -195,7 +273,33 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Описание" Width="120">
+                        <GridViewColumn Header="Status" Width="70">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8" Background="Transparent">
+                                        <TextBlock Text="{Binding StatusDisplayName}" FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:LogStatus.Critical}">
+                                                            <Setter Property="Foreground" Value="#F44336"/>
+                                                            <Setter Property="FontWeight" Value="Bold"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:LogStatus.Resolved}">
+                                                            <Setter Property="Foreground" Value="#4CAF50"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="{x:Static models:LogStatus.New}">
+                                                            <Setter Property="Foreground" Value="#2196F3"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Description" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -242,12 +346,13 @@
                 </ListView.ItemContainerStyle>
             </ListView>
 
-            <!-- Детальная информация -->
+            <!-- Detail Panel -->
             <Border Grid.Column="1" Background="#0F0F0F">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="#1A1A1A" Padding="12">
@@ -268,27 +373,43 @@
                                  VerticalScrollBarVisibility="Auto"
                                  Padding="12"/>
                     </ScrollViewer>
+
+                    <!-- Quick Actions -->
+                    <Border Grid.Row="2" Background="#1A1A1A" Padding="12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Change Status:" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <Button x:Name="BtnSetNew" Content="New" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.New}" Padding="8,4"/>
+                            <Button x:Name="BtnSetInProgress" Content="In Progress" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.InProgress}" Padding="8,4"/>
+                            <Button x:Name="BtnSetResolved" Content="Resolved" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Resolved}" Padding="8,4"/>
+                            <Button x:Name="BtnSetCritical" Content="Critical" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Critical}" Padding="8,4" Background="#C62828"/>
+                            <Button x:Name="BtnSetIgnored" Content="Ignored" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Ignored}" Padding="8,4"/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>
 
-        <!-- Статус бар -->
+        <!-- Status Bar -->
         <Border Grid.Row="3" Background="#1A1A1A" BorderThickness="1,0,0,0" BorderBrush="#2A2A2A">
             <StatusBar Background="Transparent" Foreground="#AAAAAA">
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtStatus" Text="Готов" FontSize="12"/>
+                    <TextBlock x:Name="TxtStatus" Text="Ready" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtFileInfo" Text="Файл не выбран" FontSize="12"/>
+                    <TextBlock x:Name="TxtFileInfo" Text="No file selected" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtFileType" Text="Тип: неизвестно" FontSize="12"/>
+                    <TextBlock x:Name="TxtFileType" Text="Type: -" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtEntryCount" Text="Записей: 0" FontSize="12"/>
+                    <TextBlock x:Name="TxtEntryCount" Text="Entries: 0" FontSize="12"/>
+                </StatusBarItem>
+                <Separator/>
+                <StatusBarItem>
+                    <TextBlock x:Name="TxtErrorCount" Text="Errors: 0" FontSize="12" Foreground="#FF6B6B"/>
                 </StatusBarItem>
             </StatusBar>
         </Border>

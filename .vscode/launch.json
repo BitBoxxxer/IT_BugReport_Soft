@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Log Viewer (WPF)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft/bin/Debug/net10.0-windows/IT_Web_Soft.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "enableStepFiltering": true,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": false,
+                "exceptions": false,
+                "browserStdOut": false
+            }
+        },
+        {
+            "name": "Log Viewer (WPF) - Release",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-release",
+            "program": "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft/bin/Release/net10.0-windows/IT_Web_Soft.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

@@ -1,0 +1,85 @@
+# .NET / Visual Studio Build Outputs
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio auto generated files
+*.g.cs
+*.g.i.cs
+*.baml
+*.cache
+*.dll
+*.exe
+*.pdb
+*.resources
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# WPF temporary files
+*_wpftmp.csproj
+*_wpftmp.AssemblyInfo.cs
+*_wpftmp.AssemblyInfoInputs.cache
+*_wpftmp.GeneratedMSBuildEditorConfig.editorconfig
+*_wpftmp.GlobalUsings.g.cs
+*_wpftmp.assets.cache
+*_wpftmp.sourcelink.json
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build logs
+*.log
+
+# Application data
+AppData/
+*.json.bak
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Encrypted log files (optional - uncomment if needed)
+# *.enc

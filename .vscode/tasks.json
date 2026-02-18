@@ -1,0 +1,84 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft/IT_Web_Soft.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent",
+                "echo": false,
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "build-release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft/IT_Web_Soft.csproj",
+                "-c",
+                "Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "echo": false,
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft/IT_Web_Soft.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/IT_M104/IT_Web_Soft/IT_Web_Soft/IT_Web_Soft.csproj",
+                "-c",
+                "Release",
+                "-r",
+                "win-x64",
+                "--self-contained",
+                "true"
+            ],
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always"
+            }
+        }
+    ]
+}

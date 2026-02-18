@@ -8,27 +8,71 @@ using System.Windows.Controls;
 using Microsoft.Win32;
 using LogViewer.Models;
 using LogViewer.Services;
+using LogViewer.Windows;
 using Newtonsoft.Json.Linq;
 
 namespace LogViewer
 {
+    /// <summary>
+    /// Main window for Log Viewer application
+    /// </summary>
     public partial class MainWindow : Window
     {
         private List<LogEntry> _allEntries = new();
+        private List<LogEntry> _filteredEntries = new();
         private string? _currentFilePath;
+        private readonly DataService _dataService;
+        private LogEntry? _selectedEntry;
+        private bool _isInitialized = false;
 
         public MainWindow()
         {
             InitializeComponent();
-            UpdateStatus("Готов к работе");
+            _dataService = new DataService();
+            _isInitialized = true;
+            
+            LoadSavedData();
+            UpdateStatus("Ready to work");
         }
+
+        #region Data Loading
+
+        private void LoadSavedData()
+        {
+            try
+            {
+                // Load saved entries
+                _allEntries = _dataService.LoadEntries();
+                
+                // Load settings
+                var settings = _dataService.LoadSettings();
+                if (settings.AutoLoadLastFile && !string.IsNullOrEmpty(settings.LastOpenedFile))
+                {
+                    if (File.Exists(settings.LastOpenedFile))
+                    {
+                        LoadLogFile(settings.LastOpenedFile);
+                        return;
+                    }
+                }
+                
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Error loading data: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region File Operations
 
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
                 Filter = "Encrypted log files (*.enc)|*.enc|All files (*.*)|*.*",
-                Title = "Выберите файл логов"
+                Title = "Select log file"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -41,55 +85,65 @@ namespace LogViewer
         {
             try
             {
-                UpdateStatus($"Дешифровка файла...");
+                UpdateStatus("Decrypting file...");
 
                 string decryptedContent;
 
-                // Определяем тип файла
+                // Determine file type
                 if (LogDecryptor.IsEncryptedReportFile(filePath))
                 {
-                    // Это отчет
+                    // This is a report
                     decryptedContent = LogDecryptor.DecryptReportFile(filePath);
-                    TxtFileInfo.Text = $"Отчет: {Path.GetFileName(filePath)} (дешифрован)";
+                    TxtFileInfo.Text = $"Report: {Path.GetFileName(filePath)} (decrypted)";
 
-                    // Извлекаем записи из отчета
-                    _allEntries = ExtractEntriesFromReport(decryptedContent);
-                    TxtFileType.Text = "Тип: Отчет";
+                    // Extract entries from report
+                    var reportEntries = ExtractEntriesFromReport(decryptedContent);
+                    _allEntries.AddRange(reportEntries);
+                    TxtFileType.Text = "Type: Report";
                 }
                 else
                 {
-                    // Это обычные логи
+                    // Regular logs
                     decryptedContent = LogDecryptor.DecryptLogFile(filePath);
-                    _allEntries = LogDecryptor.ParseLogContent(decryptedContent);
-                    TxtFileInfo.Text = $"Файл: {Path.GetFileName(filePath)} ({new FileInfo(filePath).Length} байт)";
-                    TxtFileType.Text = "Тип: Логи";
+                    var newEntries = LogDecryptor.ParseLogContent(decryptedContent);
+                    
+                    // Import to storage
+                    _dataService.ImportEntries(newEntries, filePath);
+                    _allEntries = _dataService.LoadEntries();
+                    
+                    TxtFileInfo.Text = $"File: {Path.GetFileName(filePath)} ({new FileInfo(filePath).Length} bytes)";
+                    TxtFileType.Text = "Type: Logs";
                 }
 
                 _currentFilePath = filePath;
 
-                // Для отчетов показываем содержимое напрямую
-                if (_allEntries.Count == 0 && decryptedContent.Contains("=== ОТЧЕТ ОБ ОШИБКАХ"))
+                // Save settings
+                var settings = _dataService.LoadSettings();
+                settings.LastOpenedFile = filePath;
+                _dataService.SaveSettings(settings);
+
+                // For reports show content directly
+                if (_allEntries.Count == 0 && decryptedContent.Contains("=== ERROR REPORT"))
                 {
-                    TxtDetailHeader.Text = $"Отчет: {Path.GetFileName(filePath)}";
+                    TxtDetailHeader.Text = $"Report: {Path.GetFileName(filePath)}";
                     TxtDetailContent.Text = decryptedContent;
-                    TxtEntryCount.Text = $"Отчет ({new FileInfo(filePath).Length} байт)";
+                    TxtEntryCount.Text = $"Report ({new FileInfo(filePath).Length} bytes)";
                 }
                 else
                 {
                     ApplyFilters();
                 }
 
-                UpdateStatus($"Файл загружен: {_allEntries.Count} записей");
+                UpdateStatus($"File loaded: {_allEntries.Count} entries");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки файла:\n{ex.Message}",
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                UpdateStatus($"Ошибка: {ex.Message}");
+                MessageBox.Show($"Error loading file:\n{ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateStatus($"Error: {ex.Message}");
             }
         }
 
-        // Новый метод для извлечения записей из отчета
         private List<LogEntry> ExtractEntriesFromReport(string reportContent)
         {
             var entries = new List<LogEntry>();
@@ -104,21 +158,21 @@ namespace LogViewer
             {
                 var trimmedLine = line.Trim();
 
-                // Начинаем сбор записей после заголовка
-                if (trimmedLine.StartsWith("=== ПОСЛЕДНИЕ"))
+                // Start collecting entries after header
+                if (trimmedLine.StartsWith("=== LAST"))
                 {
                     inEntriesSection = true;
                     continue;
                 }
 
-                // Заканчиваем сбор записей при следующем заголовке
+                // Stop collecting at next header
                 if (inEntriesSection && trimmedLine.StartsWith("==="))
                 {
                     inEntriesSection = false;
                     continue;
                 }
 
-                // Парсим записи в формате логов
+                // Parse entries in log format
                 if (inEntriesSection && !string.IsNullOrEmpty(trimmedLine))
                 {
                     var entry = LogDecryptor.ParseLogLine(trimmedLine);
@@ -130,57 +184,51 @@ namespace LogViewer
             return entries;
         }
 
+        #endregion
+
+        #region Filtering and Sorting
+
         private void ApplyFilters()
         {
+            // Skip if controls are not initialized yet
+            if (!_isInitialized) return;
+            
             var filtered = _allEntries.AsEnumerable();
 
-            // Фильтр по ошибкам
-            if (ChkErrorsOnly.IsChecked == true)
+            // Filter by category
+            if (CbCategoryFilter.SelectedIndex > 0)
             {
-                filtered = filtered.Where(e => e.IsError);
+                var selectedCategory = (LogCategory)(CbCategoryFilter.SelectedIndex - 1);
+                filtered = filtered.Where(e => e.Category == selectedCategory);
             }
 
-            // Фильтр по поиску
+            // Filter by status
+            if (CbStatusFilter.SelectedIndex > 0)
+            {
+                var selectedStatus = (LogStatus)(CbStatusFilter.SelectedIndex - 1);
+                filtered = filtered.Where(e => e.Status == selectedStatus);
+            }
+
+            // Filter by search text
             if (!string.IsNullOrWhiteSpace(TxtSearch.Text))
             {
                 var searchText = TxtSearch.Text.ToLower();
                 filtered = filtered.Where(e =>
                     e.ActionType.ToLower().Contains(searchText) ||
                     e.Description.ToLower().Contains(searchText) ||
-                    e.RawEntry.ToLower().Contains(searchText));
+                    e.RawEntry.ToLower().Contains(searchText) ||
+                    e.UserNotes.ToLower().Contains(searchText));
             }
 
-            // Сортировка по времени (новые сверху)
+            // Sort by time (newest first)
             filtered = filtered.OrderByDescending(e => e.Timestamp);
 
-            LvLogEntries.ItemsSource = filtered.ToList();
-            TxtEntryCount.Text = $"Записей: {filtered.Count()} из {_allEntries.Count}";
-        }
+            _filteredEntries = filtered.ToList();
+            LvLogEntries.ItemsSource = _filteredEntries;
 
-        private void LvLogEntries_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (LvLogEntries.SelectedItem is LogEntry selectedEntry)
-            {
-                TxtDetailHeader.Text = $"{selectedEntry.Timestamp:yyyy-MM-dd HH:mm:ss} [{selectedEntry.ActionType}]";
-
-                var detail = new StringBuilder();
-                detail.AppendLine($"ВРЕМЯ: {selectedEntry.Timestamp:yyyy-MM-dd HH:mm:ss.fff}");
-                detail.AppendLine($"ТИП ДЕЙСТВИЯ: {selectedEntry.ActionType}");
-                detail.AppendLine($"ОПИСАНИЕ: {selectedEntry.Description}");
-                detail.AppendLine();
-
-                if (selectedEntry.ExtraInfo != null)
-                {
-                    detail.AppendLine("ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:");
-                    detail.AppendLine(selectedEntry.ExtraInfo.ToString(Newtonsoft.Json.Formatting.Indented));
-                }
-
-                detail.AppendLine();
-                detail.AppendLine("ИСХОДНАЯ ЗАПИСЬ:");
-                detail.AppendLine(selectedEntry.RawEntry);
-
-                TxtDetailContent.Text = detail.ToString();
-            }
+            // Update counts
+            TxtEntryCount.Text = $"Entries: {_filteredEntries.Count} of {_allEntries.Count}";
+            TxtErrorCount.Text = $"Errors: {_filteredEntries.Count(e => e.IsError)}";
         }
 
         private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -188,15 +236,158 @@ namespace LogViewer
             ApplyFilters();
         }
 
-        private void ChkErrorsOnly_Checked(object sender, RoutedEventArgs e)
+        private void CbCategoryFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ApplyFilters();
         }
 
-        private void ChkErrorsOnly_Unchecked(object sender, RoutedEventArgs e)
+        private void CbStatusFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ApplyFilters();
         }
+
+        private void BtnClearFilter_Click(object sender, RoutedEventArgs e)
+        {
+            TxtSearch.Text = string.Empty;
+            CbCategoryFilter.SelectedIndex = 0;
+            CbStatusFilter.SelectedIndex = 0;
+            ApplyFilters();
+        }
+
+        #endregion
+
+        #region Entry Selection
+
+        private void LvLogEntries_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _selectedEntry = LvLogEntries.SelectedItem as LogEntry;
+            
+            if (_selectedEntry != null)
+            {
+                TxtDetailHeader.Text = $"{_selectedEntry.Timestamp:yyyy-MM-dd HH:mm:ss} [{_selectedEntry.ActionType}]";
+
+                var detail = new StringBuilder();
+                detail.AppendLine($"DATE: {_selectedEntry.Timestamp:yyyy-MM-dd HH:mm:ss.fff}");
+                detail.AppendLine($"TYPE: {_selectedEntry.ActionType}");
+                detail.AppendLine($"CATEGORY: {_selectedEntry.CategoryDisplayName}");
+                detail.AppendLine($"STATUS: {_selectedEntry.StatusDisplayName}");
+                detail.AppendLine($"DESCRIPTION: {_selectedEntry.Description}");
+                detail.AppendLine();
+
+                if (!string.IsNullOrEmpty(_selectedEntry.UserNotes))
+                {
+                    detail.AppendLine("USER NOTES:");
+                    detail.AppendLine(_selectedEntry.UserNotes);
+                    detail.AppendLine();
+                }
+
+                if (_selectedEntry.ExtraInfo != null)
+                {
+                    detail.AppendLine("ADDITIONAL INFO:");
+                    detail.AppendLine(_selectedEntry.ExtraInfo.ToString(Newtonsoft.Json.Formatting.Indented));
+                    detail.AppendLine();
+                }
+
+                detail.AppendLine("ORIGINAL ENTRY:");
+                detail.AppendLine(_selectedEntry.RawEntry);
+
+                TxtDetailContent.Text = detail.ToString();
+            }
+        }
+
+        #endregion
+
+        #region CRUD Operations
+
+        private void BtnAddEntry_Click(object sender, RoutedEventArgs e)
+        {
+            var editorWindow = new LogEntryEditorWindow();
+            editorWindow.Owner = this;
+
+            if (editorWindow.ShowDialog() == true && editorWindow.Result != null)
+            {
+                var newEntry = _dataService.AddEntry(editorWindow.Result);
+                _allEntries.Add(newEntry);
+                ApplyFilters();
+                UpdateStatus($"Entry added: ID {newEntry.Id}");
+            }
+        }
+
+        private void BtnEditEntry_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedEntry == null)
+            {
+                MessageBox.Show("Select an entry to edit", 
+                    "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var editorWindow = new LogEntryEditorWindow(_selectedEntry);
+            editorWindow.Owner = this;
+
+            if (editorWindow.ShowDialog() == true && editorWindow.Result != null)
+            {
+                _dataService.UpdateEntry(editorWindow.Result);
+                
+                // Update in local list
+                var index = _allEntries.FindIndex(en => en.Id == editorWindow.Result.Id);
+                if (index >= 0)
+                {
+                    _allEntries[index] = editorWindow.Result;
+                }
+                
+                ApplyFilters();
+                UpdateStatus($"Entry updated: ID {editorWindow.Result.Id}");
+            }
+        }
+
+        private void BtnDeleteEntry_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedEntry == null)
+            {
+                MessageBox.Show("Select an entry to delete", 
+                    "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Are you sure you want to delete this entry?\n\n{_selectedEntry.Description}",
+                "Confirm deletion", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _dataService.DeleteEntry(_selectedEntry.Id);
+                _allEntries.RemoveAll(en => en.Id == _selectedEntry.Id);
+                ApplyFilters();
+                UpdateStatus($"Entry deleted: ID {_selectedEntry.Id}");
+                _selectedEntry = null;
+            }
+        }
+
+        private void BtnSetStatus_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedEntry == null)
+            {
+                MessageBox.Show("Select an entry first", 
+                    "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (sender is Button button && button.Tag is LogStatus newStatus)
+            {
+                _selectedEntry.Status = newStatus;
+                _selectedEntry.LastModified = DateTime.Now;
+                _dataService.UpdateEntry(_selectedEntry);
+                ApplyFilters();
+                UpdateStatus($"Status changed to: {LogStatusHelper.GetDisplayName(newStatus)}");
+            }
+        }
+
+        #endregion
+
+        #region Export and Statistics
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)
         {
@@ -204,20 +395,19 @@ namespace LogViewer
             {
                 LoadLogFile(_currentFilePath);
             }
-        }
-
-        private void BtnClearFilter_Click(object sender, RoutedEventArgs e)
-        {
-            TxtSearch.Text = string.Empty;
-            ChkErrorsOnly.IsChecked = false;
-            ApplyFilters();
+            else
+            {
+                _allEntries = _dataService.LoadEntries();
+                ApplyFilters();
+                UpdateStatus("List updated");
+            }
         }
 
         private void BtnExport_Click(object sender, RoutedEventArgs e)
         {
-            if (_allEntries.Count == 0)
+            if (_filteredEntries.Count == 0)
             {
-                MessageBox.Show("Нет данных для экспорта", "Информация",
+                MessageBox.Show("No data to export", "Information",
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -226,7 +416,7 @@ namespace LogViewer
             {
                 Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
                 FileName = $"log_export_{DateTime.Now:yyyyMMdd_HHmmss}.txt",
-                Title = "Экспорт логов"
+                Title = "Export logs"
             };
 
             if (saveFileDialog.ShowDialog() == true)
@@ -234,42 +424,61 @@ namespace LogViewer
                 try
                 {
                     var exportContent = new StringBuilder();
-                    exportContent.AppendLine("=== ЭКСПОРТ ЛОГОВ IT TOP COLLEGE JOURNAL ===");
-                    exportContent.AppendLine($"Сгенерировано: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                    exportContent.AppendLine($"Файл источника: {_currentFilePath ?? "Неизвестно"}");
-                    exportContent.AppendLine($"Всего записей: {_allEntries.Count}");
+                    exportContent.AppendLine("=== LOG EXPORT - LOG VIEWER ===");
+                    exportContent.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                    exportContent.AppendLine($"Source file: {_currentFilePath ?? "Unknown"}");
+                    exportContent.AppendLine($"Total entries: {_filteredEntries.Count}");
                     exportContent.AppendLine();
 
-                    foreach (var entry in _allEntries.OrderByDescending(e => e.Timestamp))
+                    foreach (var entry in _filteredEntries)
                     {
-                        exportContent.AppendLine(entry.RawEntry);
+                        exportContent.AppendLine($"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss}] [{entry.ActionType}] [{entry.StatusDisplayName}]");
+                        exportContent.AppendLine($"  {entry.Description}");
+                        if (!string.IsNullOrEmpty(entry.UserNotes))
+                        {
+                            exportContent.AppendLine($"  Notes: {entry.UserNotes}");
+                        }
+                        exportContent.AppendLine();
                     }
 
                     File.WriteAllText(saveFileDialog.FileName, exportContent.ToString(), Encoding.UTF8);
 
-                    MessageBox.Show($"Экспорт завершен: {saveFileDialog.FileName}",
-                        "Успешно", MessageBoxButton.OK, MessageBoxImage.Information);
-                    UpdateStatus($"Файл экспортирован: {saveFileDialog.FileName}");
+                    MessageBox.Show($"Export completed: {saveFileDialog.FileName}",
+                        "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UpdateStatus($"File exported: {saveFileDialog.FileName}");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка экспорта:\n{ex.Message}",
-                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error exporting:\n{ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
+        private void BtnStatistics_Click(object sender, RoutedEventArgs e)
+        {
+            var statsWindow = new StatisticsWindow(_allEntries);
+            statsWindow.Owner = this;
+            statsWindow.ShowDialog();
+        }
+
+        #endregion
+
+        #region Status Updates
+
         private void UpdateStatus(string message)
         {
             TxtStatus.Text = message;
-            if (message.StartsWith("Ошибка"))
+            if (message.StartsWith("Error"))
             {
                 TxtStatus.Foreground = System.Windows.Media.Brushes.Red;
             }
             else
             {
-                TxtStatus.Foreground = System.Windows.Media.Brushes.Black;
+                TxtStatus.Foreground = System.Windows.Media.Brushes.White;
             }
         }
+
+        #endregion
     }
 }
