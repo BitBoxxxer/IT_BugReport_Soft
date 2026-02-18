@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LogViewer"
         xmlns:models="clr-namespace:LogViewer.Models"
         mc:Ignorable="d"
-        Title="Log Viewer - IT Top College Journal" 
+        Title="Просмотр логов - IT Top College Journal" 
         Height="800" Width="1200"
         WindowStartupLocation="CenterScreen"
         Background="#0F0F0F"
@@ -141,7 +141,7 @@
         <!-- Header -->
         <Border Grid.Row="0" Background="#1A1A1A" Padding="16,12">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Log Viewer" 
+                <TextBlock Text="Просмотр логов" 
                          FontSize="18" FontWeight="Medium" 
                          VerticalAlignment="Center"/>
                 <TextBlock Text="IT Top College Journal" 
@@ -163,64 +163,64 @@
 
                 <!-- Left Buttons -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <Button x:Name="BtnOpenFile" Content="Open File" 
-                            Click="BtnOpenFile_Click" ToolTip="Open encrypted log file"/>
-                    <Button x:Name="BtnRefresh" Content="Refresh" 
-                            Click="BtnRefresh_Click" ToolTip="Refresh log list"/>
-                    <Button x:Name="BtnExport" Content="Export" 
-                            Click="BtnExport_Click" ToolTip="Export to TXT"/>
-                    <Button x:Name="BtnStatistics" Content="Statistics" 
-                            Click="BtnStatistics_Click" ToolTip="View statistics and reports"/>
+                    <Button x:Name="BtnOpenFile" Content="Открыть файл" 
+                            Click="BtnOpenFile_Click" ToolTip="Открыть зашифрованный файл логов"/>
+                    <Button x:Name="BtnRefresh" Content="Обновить" 
+                            Click="BtnRefresh_Click" ToolTip="Обновить список логов"/>
+                    <Button x:Name="BtnExport" Content="Экспорт" 
+                            Click="BtnExport_Click" ToolTip="Экспорт в TXT"/>
+                    <Button x:Name="BtnStatistics" Content="Статистика" 
+                            Click="BtnStatistics_Click" ToolTip="Просмотр статистики и отчётов"/>
                 </StackPanel>
 
                 <!-- Center Filters -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="Search" Margin="0,0,8,0"/>
+                    <TextBlock Text="Поиск" Margin="0,0,8,0"/>
                     <TextBox x:Name="TxtSearch" Width="200" 
                              TextChanged="TxtSearch_TextChanged"
-                             ToolTip="Search in logs"/>
+                             ToolTip="Поиск в логах"/>
                     
                     <Separator/>
                     
-                    <TextBlock Text="Category" Margin="8,0,8,0"/>
+                    <TextBlock Text="Категория" Margin="8,0,8,0"/>
                     <ComboBox x:Name="CbCategoryFilter" Width="120" 
                              SelectionChanged="CbCategoryFilter_SelectionChanged">
-                        <ComboBoxItem Content="All" IsSelected="True"/>
-                        <ComboBoxItem Content="System"/>
-                        <ComboBoxItem Content="User"/>
-                        <ComboBoxItem Content="Network"/>
-                        <ComboBoxItem Content="Database"/>
-                        <ComboBoxItem Content="Security"/>
-                        <ComboBoxItem Content="Application"/>
-                        <ComboBoxItem Content="Performance"/>
-                        <ComboBoxItem Content="Other"/>
+                        <ComboBoxItem Content="Все" IsSelected="True"/>
+                        <ComboBoxItem Content="Система"/>
+                        <ComboBoxItem Content="Пользователь"/>
+                        <ComboBoxItem Content="Сеть"/>
+                        <ComboBoxItem Content="База данных"/>
+                        <ComboBoxItem Content="Безопасность"/>
+                        <ComboBoxItem Content="Приложение"/>
+                        <ComboBoxItem Content="Производительность"/>
+                        <ComboBoxItem Content="Другое"/>
                     </ComboBox>
                     
                     <Separator/>
                     
-                    <TextBlock Text="Status" Margin="8,0,8,0"/>
+                    <TextBlock Text="Статус" Margin="8,0,8,0"/>
                     <ComboBox x:Name="CbStatusFilter" Width="120" 
                              SelectionChanged="CbStatusFilter_SelectionChanged">
-                        <ComboBoxItem Content="All" IsSelected="True"/>
-                        <ComboBoxItem Content="New"/>
-                        <ComboBoxItem Content="In Progress"/>
-                        <ComboBoxItem Content="Resolved"/>
-                        <ComboBoxItem Content="Ignored"/>
-                        <ComboBoxItem Content="Critical"/>
-                        <ComboBoxItem Content="Archived"/>
+                        <ComboBoxItem Content="Все" IsSelected="True"/>
+                        <ComboBoxItem Content="Новый"/>
+                        <ComboBoxItem Content="В работе"/>
+                        <ComboBoxItem Content="Решён"/>
+                        <ComboBoxItem Content="Игнор"/>
+                        <ComboBoxItem Content="Критический"/>
+                        <ComboBoxItem Content="Архив"/>
                     </ComboBox>
                 </StackPanel>
 
                 <!-- Right Buttons -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button x:Name="BtnAddEntry" Content="Add" 
-                            Click="BtnAddEntry_Click" Background="#2196F3" ToolTip="Add new entry"/>
-                    <Button x:Name="BtnEditEntry" Content="Edit" 
-                            Click="BtnEditEntry_Click" ToolTip="Edit selected entry"/>
-                    <Button x:Name="BtnDeleteEntry" Content="Delete" 
-                            Click="BtnDeleteEntry_Click" Background="#C62828" ToolTip="Delete selected entry"/>
-                    <Button x:Name="BtnClearFilter" Content="Clear Filters" 
-                            Click="BtnClearFilter_Click" ToolTip="Clear all filters"/>
+                    <Button x:Name="BtnAddEntry" Content="Добавить" 
+                            Click="BtnAddEntry_Click" Background="#2196F3" ToolTip="Добавить новую запись"/>
+                    <Button x:Name="BtnEditEntry" Content="Редактировать" 
+                            Click="BtnEditEntry_Click" ToolTip="Редактировать выбранную запись"/>
+                    <Button x:Name="BtnDeleteEntry" Content="Удалить" 
+                            Click="BtnDeleteEntry_Click" Background="#C62828" ToolTip="Удалить выбранную запись"/>
+                    <Button x:Name="BtnClearFilter" Content="Сбросить" 
+                            Click="BtnClearFilter_Click" ToolTip="Сбросить все фильтры"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -239,7 +239,7 @@
                       BorderBrush="#2A2A2A">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Time" Width="70">
+                        <GridViewColumn Header="Время" Width="70">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -250,7 +250,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Type" Width="80">
+                        <GridViewColumn Header="Тип" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -273,7 +273,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Status" Width="70">
+                        <GridViewColumn Header="Статус" Width="70">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -299,7 +299,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Description" Width="100">
+                        <GridViewColumn Header="Описание" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border Padding="8" Background="Transparent">
@@ -377,12 +377,12 @@
                     <!-- Quick Actions -->
                     <Border Grid.Row="2" Background="#1A1A1A" Padding="12">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Change Status:" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <Button x:Name="BtnSetNew" Content="New" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.New}" Padding="8,4"/>
-                            <Button x:Name="BtnSetInProgress" Content="In Progress" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.InProgress}" Padding="8,4"/>
-                            <Button x:Name="BtnSetResolved" Content="Resolved" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Resolved}" Padding="8,4"/>
-                            <Button x:Name="BtnSetCritical" Content="Critical" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Critical}" Padding="8,4" Background="#C62828"/>
-                            <Button x:Name="BtnSetIgnored" Content="Ignored" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Ignored}" Padding="8,4"/>
+                            <TextBlock Text="Изменить статус:" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <Button x:Name="BtnSetNew" Content="Новый" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.New}" Padding="8,4"/>
+                            <Button x:Name="BtnSetInProgress" Content="В работе" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.InProgress}" Padding="8,4"/>
+                            <Button x:Name="BtnSetResolved" Content="Решён" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Resolved}" Padding="8,4"/>
+                            <Button x:Name="BtnSetCritical" Content="Критический" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Critical}" Padding="8,4" Background="#C62828"/>
+                            <Button x:Name="BtnSetIgnored" Content="Игнор" Click="BtnSetStatus_Click" Tag="{x:Static models:LogStatus.Ignored}" Padding="8,4"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -393,23 +393,23 @@
         <Border Grid.Row="3" Background="#1A1A1A" BorderThickness="1,0,0,0" BorderBrush="#2A2A2A">
             <StatusBar Background="Transparent" Foreground="#AAAAAA">
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtStatus" Text="Ready" FontSize="12"/>
+                    <TextBlock x:Name="TxtStatus" Text="Готов" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtFileInfo" Text="No file selected" FontSize="12"/>
+                    <TextBlock x:Name="TxtFileInfo" Text="Файл не выбран" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtFileType" Text="Type: -" FontSize="12"/>
+                    <TextBlock x:Name="TxtFileType" Text="Тип: -" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtEntryCount" Text="Entries: 0" FontSize="12"/>
+                    <TextBlock x:Name="TxtEntryCount" Text="Записей: 0" FontSize="12"/>
                 </StatusBarItem>
                 <Separator/>
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtErrorCount" Text="Errors: 0" FontSize="12" Foreground="#FF6B6B"/>
+                    <TextBlock x:Name="TxtErrorCount" Text="Ошибок: 0" FontSize="12" Foreground="#FF6B6B"/>
                 </StatusBarItem>
             </StatusBar>
         </Border>

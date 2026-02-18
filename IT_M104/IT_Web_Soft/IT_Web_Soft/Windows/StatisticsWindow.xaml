@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LogViewer.Windows"
         xmlns:models="clr-namespace:LogViewer.Models"
         mc:Ignorable="d"
-        Title="Statistics and Reports" 
+        Title="Статистика и отчёты" 
         Height="600" Width="700"
         WindowStartupLocation="CenterOwner"
         Background="#0F0F0F"
@@ -76,7 +76,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Statistics and Reports" 
+        <TextBlock Grid.Row="0" Text="Статистика и отчёты" 
                    FontSize="20" FontWeight="Medium"
                    Margin="0,0,0,20"/>
 
@@ -97,7 +97,7 @@
                         <StackPanel>
                             <TextBlock x:Name="TxtTotalEntries" Text="0" 
                                       Style="{StaticResource StatValueStyle}"/>
-                            <TextBlock Text="Total Entries" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="Всего записей" Style="{StaticResource StatLabelStyle}"/>
                         </StackPanel>
                     </Border>
 
@@ -106,7 +106,7 @@
                         <StackPanel>
                             <TextBlock x:Name="TxtErrorCount" Text="0" 
                                       Style="{StaticResource StatValueStyle}" Foreground="#FF6B6B"/>
-                            <TextBlock Text="Errors" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="Ошибок" Style="{StaticResource StatLabelStyle}"/>
                         </StackPanel>
                     </Border>
 
@@ -115,7 +115,7 @@
                         <StackPanel>
                             <TextBlock x:Name="TxtCriticalCount" Text="0" 
                                       Style="{StaticResource StatValueStyle}" Foreground="#F44336"/>
-                            <TextBlock Text="Critical" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="Критических" Style="{StaticResource StatLabelStyle}"/>
                         </StackPanel>
                     </Border>
 
@@ -124,7 +124,7 @@
                         <StackPanel>
                             <TextBlock x:Name="TxtResolvedCount" Text="0" 
                                       Style="{StaticResource StatValueStyle}" Foreground="#4CAF50"/>
-                            <TextBlock Text="Resolved" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="Решённых" Style="{StaticResource StatLabelStyle}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -138,19 +138,19 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Oldest Entry" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="Самая старая запись" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock x:Name="TxtOldestEntry" Text="-" FontSize="14" Margin="0,4,0,0"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Newest Entry" Style="{StaticResource StatLabelStyle}"/>
+                            <TextBlock Text="Самая новая запись" Style="{StaticResource StatLabelStyle}"/>
                             <TextBlock x:Name="TxtNewestEntry" Text="-" FontSize="14" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- By Category -->
-                <TextBlock Text="By Category" FontSize="16" FontWeight="Medium" Margin="8,16,8,8"/>
+                <TextBlock Text="По категориям" FontSize="16" FontWeight="Medium" Margin="8,16,8,8"/>
                 <Border Style="{StaticResource CardStyle}">
                     <ListView x:Name="LvByCategory" Background="Transparent" BorderThickness="0">
                         <ListView.ItemTemplate>
@@ -170,7 +170,7 @@
                 </Border>
 
                 <!-- By Status -->
-                <TextBlock Text="By Status" FontSize="16" FontWeight="Medium" Margin="8,16,8,8"/>
+                <TextBlock Text="По статусам" FontSize="16" FontWeight="Medium" Margin="8,16,8,8"/>
                 <Border Style="{StaticResource CardStyle}">
                     <ListView x:Name="LvByStatus" Background="Transparent" BorderThickness="0">
                         <ListView.ItemTemplate>
@@ -197,7 +197,7 @@
                 </Border>
 
                 <!-- Report Preview -->
-                <TextBlock Text="Report Preview" FontSize="16" FontWeight="Medium" Margin="8,16,8,8"/>
+                <TextBlock Text="Предпросмотр отчёта" FontSize="16" FontWeight="Medium" Margin="8,16,8,8"/>
                 <Border Style="{StaticResource CardStyle}" Height="150">
                     <TextBox x:Name="TxtReportPreview" 
                             Background="#0F0F0F" Foreground="#E0E0E0"
@@ -210,7 +210,7 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button x:Name="BtnExportReport" Content="Export Report" Click="BtnExportReport_Click" Background="#2196F3">
+            <Button x:Name="BtnExportReport" Content="Экспорт отчёта" Click="BtnExportReport_Click" Background="#2196F3">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Style.Triggers>
@@ -221,7 +221,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button x:Name="BtnClose" Content="Close" Click="BtnClose_Click"/>
+            <Button x:Name="BtnClose" Content="Закрыть" Click="BtnClose_Click"/>
         </StackPanel>
     </Grid>
 </Window>

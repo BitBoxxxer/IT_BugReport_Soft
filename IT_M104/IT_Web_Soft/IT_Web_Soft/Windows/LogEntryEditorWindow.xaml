@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LogViewer.Windows"
         xmlns:models="clr-namespace:LogViewer.Models"
         mc:Ignorable="d"
-        Title="Log Entry Editor" 
+        Title="Редактор записи лога" 
         Height="550" Width="600"
         WindowStartupLocation="CenterOwner"
         Background="#0F0F0F"
@@ -97,7 +97,7 @@
 
         <!-- Header -->
         <TextBlock Grid.Row="0" x:Name="TxtHeader" 
-                   Text="New Log Entry" 
+                   Text="Новая запись лога" 
                    FontSize="20" FontWeight="Medium"
                    Margin="0,0,0,20"/>
 
@@ -105,34 +105,34 @@
         <ScrollViewer Grid.Row="1">
             <StackPanel>
                 <!-- Timestamp -->
-                <TextBlock Text="Date and Time" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Дата и время" Style="{StaticResource HeaderTextStyle}"/>
                 <DatePicker x:Name="DpDate" Margin="0,0,0,16" 
                            SelectedDate="{Binding Timestamp}"/>
                 
-                <TextBlock Text="Time" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Время" Style="{StaticResource HeaderTextStyle}"/>
                 <TextBox x:Name="TxtTime" Margin="0,0,0,16" 
                         Text="12:00:00" Width="100" HorizontalAlignment="Left"/>
-                <TextBlock x:Name="TxtTimeError" Text="Invalid time format (HH:MM:SS)" 
+                <TextBlock x:Name="TxtTimeError" Text="Неверный формат времени (ЧЧ:ММ:СС)" 
                           Style="{StaticResource ErrorTextStyle}"/>
 
                 <!-- Action Type -->
-                <TextBlock Text="Action Type *" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Тип действия *" Style="{StaticResource HeaderTextStyle}"/>
                 <TextBox x:Name="TxtActionType" Margin="0,0,0,16"
                         Text="{Binding ActionType, UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock x:Name="TxtActionTypeError" Text="Action type is required" 
+                <TextBlock x:Name="TxtActionTypeError" Text="Тип действия обязателен" 
                           Style="{StaticResource ErrorTextStyle}"/>
 
                 <!-- Description -->
-                <TextBlock Text="Description *" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Описание *" Style="{StaticResource HeaderTextStyle}"/>
                 <TextBox x:Name="TxtDescription" Margin="0,0,0,16"
                         Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                         TextWrapping="Wrap" AcceptsReturn="True" Height="60"
                         VerticalScrollBarVisibility="Auto"/>
-                <TextBlock x:Name="TxtDescriptionError" Text="Description is required" 
+                <TextBlock x:Name="TxtDescriptionError" Text="Описание обязательно" 
                           Style="{StaticResource ErrorTextStyle}"/>
 
                 <!-- Category -->
-                <TextBlock Text="Category" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Категория" Style="{StaticResource HeaderTextStyle}"/>
                 <ComboBox x:Name="CbCategory" Margin="0,0,0,16"
                          SelectedItem="{Binding Category}">
                     <ComboBox.ItemTemplate>
@@ -143,7 +143,7 @@
                 </ComboBox>
 
                 <!-- Status -->
-                <TextBlock Text="Status" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Статус" Style="{StaticResource HeaderTextStyle}"/>
                 <ComboBox x:Name="CbStatus" Margin="0,0,0,16"
                          SelectedItem="{Binding Status}">
                     <ComboBox.ItemTemplate>
@@ -154,26 +154,26 @@
                 </ComboBox>
 
                 <!-- User Notes -->
-                <TextBlock Text="User Notes" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Заметки пользователя" Style="{StaticResource HeaderTextStyle}"/>
                 <TextBox x:Name="TxtUserNotes" Margin="0,0,0,16"
                         Text="{Binding UserNotes, UpdateSourceTrigger=PropertyChanged}"
                         TextWrapping="Wrap" AcceptsReturn="True" Height="80"
                         VerticalScrollBarVisibility="Auto"/>
 
                 <!-- Extra Info (JSON) -->
-                <TextBlock Text="Extra Info (JSON)" Style="{StaticResource HeaderTextStyle}"/>
+                <TextBlock Text="Доп. информация (JSON)" Style="{StaticResource HeaderTextStyle}"/>
                 <TextBox x:Name="TxtExtraInfo" Margin="0,0,0,16"
                         TextWrapping="Wrap" AcceptsReturn="True" Height="60"
                         VerticalScrollBarVisibility="Auto"
                         FontFamily="Consolas" FontSize="12"/>
-                <TextBlock x:Name="TxtExtraInfoError" Text="Invalid JSON" 
+                <TextBlock x:Name="TxtExtraInfoError" Text="Неверный JSON" 
                           Style="{StaticResource ErrorTextStyle}"/>
             </StackPanel>
         </ScrollViewer>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button x:Name="BtnSave" Content="Save" Click="BtnSave_Click" Background="#2196F3">
+            <Button x:Name="BtnSave" Content="Сохранить" Click="BtnSave_Click" Background="#2196F3">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Style.Triggers>
@@ -184,7 +184,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button x:Name="BtnCancel" Content="Cancel" Click="BtnCancel_Click"/>
+            <Button x:Name="BtnCancel" Content="Отмена" Click="BtnCancel_Click"/>
         </StackPanel>
     </Grid>
 </Window>
