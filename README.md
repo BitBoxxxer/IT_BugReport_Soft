@@ -103,4 +103,4 @@ IT_M104/IT_Web_Soft/IT_Web_Soft/
 
 ## Автор
 
-Кейси Майлсон (BitBoxxxer - GitHub) :D
+### Кейси Майклсон (BitBoxxxer - GitHub) :D
